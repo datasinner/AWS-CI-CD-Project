@@ -1,4 +1,4 @@
-## End to End MAchine Learning Project
+## End to End MAchine Learning Project1
 
 1. Docker Build checked
 2. Github Workflow
@@ -35,3 +35,4 @@ AWS_REGION = us-east-1
 AWS_ECR_LOGIN_URI = demo>>  566373416292.dkr.ecr.ap-south-1.amazonaws.com
 
 ECR_REPOSITORY_NAME = simple-app
+# AWS-CI-CD-Projects
