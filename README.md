@@ -1,4 +1,4 @@
-## End to End MAchine Learning Project1
+## End to End Machine Learning Project1
 
 1. Docker Build checked
 2. Github Workflow
