@@ -15,9 +15,16 @@ jobs:
   integration:
     name: Continuous Integration
     runs-on: ubuntu-latest
+    outputs:
+      ci-approved: ${{ steps.status-check.outputs.approved }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
       - name: Lint code
         run: echo "Linting repository"
@@ -25,10 +32,22 @@ jobs:
       - name: Run unit tests
         run: echo "Running unit tests"
 
+      - name: Check CI Status
+        id: status-check
+        run: |
+          echo "🔍 Checking CI approval status..."
+          if python scripts/status_check.py; then
+            echo "approved=true" >> $GITHUB_OUTPUT
+          else
+            echo "approved=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
   build-and-push-ecr-image:
     name: Continuous Delivery
     needs: integration
     runs-on: ubuntu-latest
+    if: needs.integration.outputs.ci-approved == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -64,8 +83,9 @@ jobs:
           
           
   Continuous-Deployment:
-    needs: build-and-push-ecr-image
+    needs: [integration, build-and-push-ecr-image]
     runs-on: self-hosted
+    if: needs.integration.outputs.ci-approved == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
