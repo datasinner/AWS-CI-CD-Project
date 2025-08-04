@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - test
+      - test_ci-cd
     paths-ignore:
       - 'README.md'
       - 'status_check.txt'
