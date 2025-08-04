@@ -7,6 +7,7 @@ on:
       - test
     paths-ignore:
       - 'README.md'
+      - 'status_check.txt'
 
 permissions:
   id-token: write
