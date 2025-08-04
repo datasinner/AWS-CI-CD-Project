@@ -26,6 +26,12 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Clear Status File for Fresh Input
+        run: |
+          echo "🔄 Clearing status_check.txt for fresh manual input..."
+          echo "waiting for approval..." > status_check.txt
+          echo "📝 Status file cleared. Waiting for manual approval."
+
       - name: Lint code
         run: echo "Linting repository"
 
