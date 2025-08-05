@@ -105,17 +105,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: ELITEA CD approve
-        id: cd-status-check
-        run: |
-          echo "🔍 Checking CD approval status..."
-          if python scripts/status_check_cd.py; then
-            echo "approved=true" >> $GITHUB_OUTPUT
-          else
-            echo "approved=false" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -139,6 +128,18 @@ jobs:
       - name: Run Docker Image to serve users
         run: |
          docker run -d -p 8080:8080 --ipc="host" --name=mltest -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -e 'AWS_REGION=${{ secrets.AWS_REGION }}'  ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+      
+      - name: ELITEA CD approve
+        id: cd-status-check
+        run: |
+          echo "🔍 Checking CD approval status..."
+          if python scripts/status_check_cd.py; then
+            echo "approved=true" >> $GITHUB_OUTPUT
+          else
+            echo "approved=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
       - name: Clean previous images and containers
         run: |
          docker system prune -f
