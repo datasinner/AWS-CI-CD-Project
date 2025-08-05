@@ -40,7 +40,7 @@ jobs:
       - name: Run unit tests
         run: echo "Running unit tests"
 
-      - name: Check CI Status
+      - name: ELITEA approve
         id: status-check
         run: |
           echo "🔍 Checking CI approval status..."
