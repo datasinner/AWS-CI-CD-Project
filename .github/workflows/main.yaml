@@ -40,7 +40,7 @@ jobs:
       - name: Run unit tests
         run: echo "Running unit tests"
 
-      - name: ELITEA approve
+      - name: ELITEA CI approve
         id: status-check
         run: |
           echo "🔍 Checking CI approval status..."
@@ -94,9 +94,27 @@ jobs:
     needs: [integration, build-and-push-ecr-image]
     runs-on: self-hosted
     if: needs.integration.outputs.ci-approved == 'true'
+    outputs:
+      cd-approved: ${{ steps.cd-status-check.outputs.approved }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: ELITEA CD approve
+        id: cd-status-check
+        run: |
+          echo "🔍 Checking CD approval status..."
+          if python scripts/status_check_cd.py; then
+            echo "approved=true" >> $GITHUB_OUTPUT
+          else
+            echo "approved=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1

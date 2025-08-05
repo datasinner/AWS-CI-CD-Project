@@ -1,1 +1,1 @@
-ci approved
+cd approved

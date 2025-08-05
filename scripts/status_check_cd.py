@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Status Check Script for CI/CD Pipeline
-Reads status_check.txt from remote GitHub repository and validates if CI is approved
+Status Check Script for CD (Continuous Deployment) Pipeline
+Reads status_check.txt from remote GitHub repository and validates if CD is approved
 Polls continuously every 5 seconds until decision is made
 """
 import sys
@@ -26,7 +26,7 @@ def get_github_file_content(owner, repo, file_path, branch="main"):
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}?ref={branch}"
     
     try:
-        print(f"🌐 Fetching {file_path} from GitHub repository...")
+        print(f"🌐 Fetching {file_path} from GitHub repository for CD approval...")
         
         with urllib.request.urlopen(url) as response:
             data = json.loads(response.read().decode())
@@ -45,9 +45,9 @@ def get_github_file_content(owner, repo, file_path, branch="main"):
         print(f"❌ Error fetching file from GitHub: {str(e)}")
         return None
 
-def check_ci_status_once():
+def check_cd_status_once():
     """
-    Check CI status from remote status_check.txt file
+    Check CD status from remote status_check.txt file
     Returns: 'approved', 'declined', 'waiting', or 'error'
     """
     # Get repository information from environment variables (GitHub Actions provides these)
@@ -67,28 +67,28 @@ def check_ci_status_once():
     content_lower = content.lower()
     print(f"📄 Remote status file content: '{content}'")
     
-    # Check if content matches decision text
-    if content_lower == "ci approved":
-        print("✅ CI Status: APPROVED - Proceeding with build...")
+    # Check if content matches CD approval text
+    if content_lower == "cd approved":
+        print("✅ CD Status: APPROVED - Proceeding with deployment...")
         return 'approved'
-    elif content_lower == "ci declined":
-        print("❌ CI Status: DECLINED - Stopping pipeline...")
+    elif content_lower == "cd declined":
+        print("❌ CD Status: DECLINED - Stopping deployment...")
         return 'declined'
     else:
-        print(f"⏳ Waiting for decision... Found: '{content}'")
-        print("Expected: 'ci approved' or 'ci declined' (case insensitive)")
+        print(f"⏳ Waiting for CD decision... Found: '{content}'")
+        print("Expected: 'cd approved' or 'cd declined' (case insensitive)")
         return 'waiting'
 
-def poll_for_decision(max_attempts=None):
+def poll_for_cd_decision(max_attempts=None):
     """
-    Continuously poll status_check.txt every 5 seconds until decision is made
+    Continuously poll status_check.txt every 5 seconds until CD decision is made
     Args:
         max_attempts: Maximum number of attempts (None for unlimited)
     Returns:
         True if approved, False if declined or error
     """
-    print("🔄 Starting continuous polling (every 5 seconds)...")
-    print("💡 Update status_check.txt with 'ci approved' or 'ci declined' to proceed")
+    print("🔄 Starting continuous polling for CD approval (every 5 seconds)...")
+    print("💡 Update status_check.txt with 'cd approved' or 'cd declined' to proceed")
     
     attempt = 0
     start_time = time.time()
@@ -97,18 +97,18 @@ def poll_for_decision(max_attempts=None):
         attempt += 1
         elapsed_time = time.time() - start_time
         
-        print(f"\n🔍 Check #{attempt} (elapsed: {elapsed_time:.1f}s)")
+        print(f"\n🔍 CD Check #{attempt} (elapsed: {elapsed_time:.1f}s)")
         
-        status = check_ci_status_once()
+        status = check_cd_status_once()
         
         if status == 'approved':
-            print("🎉 Decision received: APPROVED!")
+            print("🎉 CD Decision received: APPROVED!")
             return True
         elif status == 'declined':
-            print("🛑 Decision received: DECLINED!")
+            print("🛑 CD Decision received: DECLINED!")
             return False
         elif status == 'error':
-            print("💥 Error occurred during status check!")
+            print("💥 Error occurred during CD status check!")
             return False
         elif status == 'waiting':
             # Check max attempts if specified
@@ -116,7 +116,7 @@ def poll_for_decision(max_attempts=None):
                 print(f"⏰ Maximum attempts ({max_attempts}) reached. Stopping...")
                 return False
             
-            print("⏰ Waiting 5 seconds before next check...")
+            print("⏰ Waiting 5 seconds before next CD check...")
             time.sleep(5)
         
         # Safety check to prevent infinite loops (24 hours max)
@@ -125,15 +125,15 @@ def poll_for_decision(max_attempts=None):
             return False
 
 def main():
-    """Main function to run the status check with continuous polling"""
-    print("🔍 Starting CI Status Check with Continuous Polling...")
+    """Main function to run the CD status check with continuous polling"""
+    print("🔍 Starting CD (Continuous Deployment) Status Check with Continuous Polling...")
     
-    # Start polling for decision
-    if poll_for_decision():
-        print("🚀 Status check passed! Continuing with CI/CD pipeline...")
+    # Start polling for CD decision
+    if poll_for_cd_decision():
+        print("🚀 CD Status check passed! Continuing with deployment...")
         sys.exit(0)  # Success
     else:
-        print("🛑 Status check failed! Stopping CI/CD pipeline...")
+        print("🛑 CD Status check failed! Stopping deployment...")
         sys.exit(1)  # Failure
 
 if __name__ == "__main__":
